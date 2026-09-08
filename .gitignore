@@ -1,0 +1,62 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local configuration and API keys; keep shareable examples
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Runtime chat data, uploaded documents, and generated FAISS indexes
+/data/
+/uploads/
+/faiss/
+
+# SQLite databases and their journal / write-ahead log files
+# memory.py can also create checkpointer.db outside data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Test, type-checker, and linter caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Frontend dependencies and generated output
+node_modules/
+*.tsbuildinfo
+/frontend/dist/
+/test-results/
+/playwright-report/
