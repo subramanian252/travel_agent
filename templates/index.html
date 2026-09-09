@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Routewise is an AI travel planner that turns a trip idea into a flight-aware, hotel-researched itinerary.">
+  <title>Routewise — AI travel planning, mapped out</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#08090b; --surface:#111317; --surface-2:#15181d; --text:#f4f4f5; --muted:#a1a1aa; --dim:#7f8389; --orange:#ff5722; --orange-dark:#c23800; --green:#34d399; --line:rgba(255,255,255,.1); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-width:320px; color:var(--text); background:var(--bg); font-family:"Space Grotesk",Arial,sans-serif; overflow-x:hidden; }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.25; z-index:3; background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px); }
+    a { color:inherit; text-decoration:none; }
+    button, textarea { font:inherit; }
+    .shell { width:min(1180px, calc(100% - 40px)); margin:0 auto; }
+    .nav { position:relative; z-index:5; display:flex; justify-content:space-between; align-items:center; padding:24px 0; }
+    .brand { display:flex; align-items:center; gap:11px; font-size:16px; font-weight:600; letter-spacing:-.02em; }
+    .mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--orange),var(--orange-dark)); color:#1a0b05; box-shadow:0 9px 24px rgba(255,87,34,.28),inset 0 1px rgba(255,255,255,.3); }
+    .nav-status { display:flex; align-items:center; gap:8px; color:#c3c5ca; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.06em; }
+    .pulse { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(52,211,153,.45); animation:pulse 2s infinite; }
+    @keyframes pulse { 70% { box-shadow:0 0 0 7px rgba(52,211,153,0); } 100% { box-shadow:0 0 0 0 rgba(52,211,153,0); } }
+    .hero { position:relative; padding:52px 0 34px; }
+    .hero::before { content:"ROUTEWISE"; position:absolute; top:70px; left:50%; transform:translateX(-50%); font-size:clamp(76px,17vw,220px); font-weight:700; letter-spacing:-.075em; color:rgba(255,255,255,.018); white-space:nowrap; pointer-events:none; }
+    .glow { position:absolute; width:600px; height:400px; top:-90px; left:43%; border-radius:50%; background:radial-gradient(ellipse,rgba(255,87,34,.15),transparent 67%); filter:blur(12px); pointer-events:none; }
+    .hero-content { position:relative; z-index:1; max-width:770px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:8px 11px; border:1px solid rgba(255,255,255,.15); border-radius:999px; background:rgba(17,19,23,.72); color:#c3c5ca; font:500 10px "JetBrains Mono",monospace; letter-spacing:.11em; text-transform:uppercase; }
+    .eyebrow i { width:5px; height:5px; border-radius:50%; background:var(--orange); }
+    h1 { margin:20px 0 16px; font-size:clamp(50px,8vw,94px); line-height:.93; letter-spacing:-.055em; font-weight:600; }
+    h1 .muted { color:#7f8389; }
+    h1 .accent { background:linear-gradient(180deg,#fff,#ffe4d0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .lead { max-width:610px; color:#c3c5ca; font-size:17px; line-height:1.6; }
+    .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:22px; }
+    .chip { display:inline-flex; gap:8px; align-items:center; padding:9px 13px; border:1px solid rgba(255,255,255,.16); border-radius:999px; background:rgba(0,0,0,.18); color:#e4e4e7; font-size:13px; }
+    .chip b { width:5px; height:5px; border-radius:50%; background:var(--orange); }
+    .planner { position:relative; z-index:4; padding:20px; border:1px solid rgba(255,255,255,.12); border-radius:22px; background:rgba(17,19,23,.93); box-shadow:0 40px 100px -32px rgba(0,0,0,.85); }
+    .planner-top { display:flex; justify-content:space-between; align-items:center; padding:0 2px 15px; border-bottom:1px solid var(--line); }
+    .planner-label { font:500 10px "JetBrains Mono",monospace; letter-spacing:.11em; color:var(--dim); text-transform:uppercase; }
+    .planner-name { margin-top:5px; font-size:17px; font-weight:600; letter-spacing:-.02em; }
+    .agent-badge { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:#c3c5ca; font:500 10px "JetBrains Mono",monospace; }
+    .agent-badge span { width:6px; height:6px; border-radius:50%; background:var(--green); }
+    .form { padding-top:17px; }
+    label { display:block; margin-bottom:8px; font:500 11px "JetBrains Mono",monospace; color:#c3c5ca; letter-spacing:.06em; }
+    textarea { display:block; width:100%; min-height:92px; resize:vertical; padding:15px 16px; border:1px solid rgba(255,255,255,.13); border-radius:13px; outline:none; background:#0b0c0f; color:#f4f4f5; line-height:1.55; transition:border .2s,box-shadow .2s; }
+    textarea::placeholder { color:#696d74; }
+    textarea:focus { border-color:rgba(255,87,34,.75); box-shadow:0 0 0 3px rgba(255,87,34,.12); }
+    .form-footer { display:flex; align-items:center; justify-content:space-between; gap:13px; margin-top:12px; }
+    .hint { color:var(--dim); font:11px "JetBrains Mono",monospace; }
+    .submit { cursor:pointer; display:inline-flex; justify-content:center; align-items:center; gap:9px; padding:12px 16px 12px 19px; border:0; border-radius:999px; background:var(--orange); color:#1a0b05; font-size:13px; font-weight:700; transition:transform .18s,background .18s; box-shadow:0 12px 28px rgba(255,87,34,.27); }
+    .submit:hover { transform:translateY(-2px); background:#ff6a3a; }
+    .submit:disabled { cursor:wait; opacity:.68; transform:none; }
+    .arrow { display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:#1a0b05; color:var(--orange); font-size:16px; }
+    .examples { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding-top:14px; }
+    .examples > span { margin-right:2px; color:var(--dim); font:10px "JetBrains Mono",monospace; text-transform:uppercase; letter-spacing:.08em; }
+    .example { cursor:pointer; padding:7px 9px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:#c3c5ca; font-size:11px; transition:border .2s,color .2s; }
+    .example:hover { border-color:rgba(255,87,34,.55); color:#fff; }
+    .planner-progress { display:none; margin-top:17px; padding:14px 15px; border:1px solid rgba(255,87,34,.22); border-radius:12px; background:rgba(255,87,34,.055); }
+    .planner-progress.show { display:block; animation:reveal .22s ease-out; }
+    .progress-meta { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; color:#ddd; font:500 11px "JetBrains Mono",monospace; letter-spacing:.04em; }
+    .progress-meta span:last-child { color:#f39978; }
+    .progress-track { height:5px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.09); }
+    .progress-fill { width:0%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--orange-dark),var(--orange),#ffb199); box-shadow:0 0 16px rgba(255,87,34,.75); transition:width .5s ease; }
+    .progress-stages { display:flex; gap:12px; margin-top:12px; color:#72757b; font:10px "JetBrains Mono",monospace; }
+    .progress-stages span { display:inline-flex; align-items:center; gap:5px; transition:color .25s; }
+    .progress-stages span::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .progress-stages span.active { color:#ff9a79; }
+    .progress-stages span.done { color:var(--green); }
+    .workflow-section { padding:72px 0 96px; }
+    .section-top { display:flex; justify-content:space-between; align-items:end; gap:30px; margin-bottom:23px; }
+    h2 { margin:12px 0 0; max-width:520px; font-size:clamp(31px,4vw,49px); line-height:.98; letter-spacing:-.045em; font-weight:600; }
+    .section-copy { max-width:300px; color:var(--muted); font-size:14px; line-height:1.55; }
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .step { position:relative; min-height:195px; padding:21px; border:1px solid var(--line); border-radius:16px; background:var(--surface); overflow:hidden; }
+    .step:hover { border-color:rgba(255,87,34,.35); }
+    .step-number { color:var(--orange); font:500 11px "JetBrains Mono",monospace; letter-spacing:.08em; }
+    .step-icon { display:grid; place-items:center; width:38px; height:38px; margin:24px 0 18px; border-radius:11px; background:#21150f; color:var(--orange); }
+    .step h3 { margin:0; font-size:17px; letter-spacing:-.02em; }
+    .step p { margin:7px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
+    .step::after { content:""; position:absolute; right:-50px; bottom:-70px; width:150px; height:150px; border-radius:50%; background:rgba(255,87,34,.08); filter:blur(10px); }
+    .result { display:none; position:relative; z-index:4; width:min(1180px, calc(100% - 40px)); margin:28px auto 96px; padding:clamp(20px,3vw,38px); border:1px solid rgba(255,87,34,.32); border-radius:24px; background:linear-gradient(130deg,rgba(31,20,15,.98),rgba(17,19,23,.98)); box-shadow:0 30px 80px -45px rgba(255,87,34,.5); }
+    .result.show { display:block; animation:reveal .35s ease-out; }
+    @keyframes reveal { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+    .result-top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .result h2 { margin:5px 0 0; font-size:clamp(27px,4vw,42px); }
+    .copy { cursor:pointer; padding:8px 11px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:#d4d4d8; font:11px "JetBrains Mono",monospace; }
+    .itinerary { padding:clamp(19px,3vw,34px); border:1px solid rgba(255,255,255,.08); border-radius:16px; background:rgba(5,6,8,.42); color:#d9dade; font-size:15px; line-height:1.72; }
+    .itinerary > *:first-child { margin-top:0; }
+    .itinerary > *:last-child { margin-bottom:0; }
+    .itinerary h1, .itinerary h2, .itinerary h3, .itinerary h4 { color:#fff; line-height:1.2; letter-spacing:-.025em; }
+    .itinerary h1 { margin:1.7em 0 .65em; font-size:29px; }
+    .itinerary h2 { margin:1.65em 0 .65em; padding-bottom:10px; border-bottom:1px solid var(--line); font-size:23px; }
+    .itinerary h3 { margin:1.4em 0 .45em; font-size:18px; }
+    .itinerary h4 { margin:1.3em 0 .35em; font-size:16px; }
+    .itinerary p { margin:0 0 1em; }
+    .itinerary strong { color:#fff; font-weight:600; }
+    .itinerary em { color:#f0b59f; }
+    .itinerary hr { height:1px; margin:1.8em 0; border:0; background:linear-gradient(90deg,rgba(255,87,34,.65),transparent); }
+    .itinerary ul, .itinerary ol { margin:0 0 1.15em; padding-left:1.35em; }
+    .itinerary li { padding-left:.3em; margin:.35em 0; }
+    .itinerary li::marker { color:var(--orange); }
+    .table-wrap { overflow-x:auto; margin:1.25em 0; border:1px solid var(--line); border-radius:12px; }
+    .itinerary table { width:100%; min-width:430px; border-collapse:collapse; font-size:14px; }
+    .itinerary th { padding:11px 14px; background:rgba(255,87,34,.1); color:#ffd5c7; text-align:left; font:500 11px "JetBrains Mono",monospace; letter-spacing:.04em; text-transform:uppercase; }
+    .itinerary td { padding:11px 14px; border-top:1px solid rgba(255,255,255,.07); color:#d4d4d8; }
+    .itinerary tr:last-child td { color:#fff; font-weight:600; }
+    .itinerary th + th, .itinerary td + td { border-left:1px solid rgba(255,255,255,.06); }
+    .itinerary a { color:#ff9a79; text-decoration:underline; }
+    .error { display:none; margin-top:12px; padding:11px 13px; border-radius:9px; border:1px solid rgba(248,113,113,.32); background:rgba(127,29,29,.16); color:#fecaca; font-size:13px; }
+    .error.show { display:block; }
+    footer { display:flex; justify-content:space-between; gap:16px; padding:25px 0 35px; border-top:1px solid var(--line); color:var(--dim); font:10px "JetBrains Mono",monospace; letter-spacing:.06em; }
+    footer span:last-child { color:var(--orange); }
+    .plane-svg { width:18px; height:18px; }
+    @media (max-width:700px) { .shell { width:min(100% - 28px,1180px); } .nav { padding:17px 0; } .nav-status { font-size:9px; } .hero { padding:42px 0 28px; } h1 { font-size:52px; } .lead { font-size:15px; } .form-footer { align-items:flex-end; } .hint { max-width:130px; line-height:1.4; } .workflow-section { padding-top:52px; } .section-top { align-items:start; flex-direction:column; gap:15px; } .steps { grid-template-columns:1fr; } .step { min-height:158px; } .step-icon { margin:18px 0 13px; } footer { flex-direction:column; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="shell nav">
+      <a class="brand" href="#top" aria-label="Routewise home">
+        <span class="mark">⌁</span><span>Routewise</span>
+      </a>
+      <div class="nav-status"><span class="pulse"></span>AI PLANNER ONLINE</div>
+    </div>
+
+    <section class="shell hero" id="top">
+      <div class="glow"></div>
+      <div class="hero-content">
+        <span class="eyebrow"><i></i> Multi-agent travel system</span>
+        <h1>Travel less<br><span class="muted">messy.</span> Plan <span class="accent">more.</span></h1>
+        <p class="lead">A flight-aware, hotel-researched itinerary planner that turns one trip idea into a clear route, stay options, and a budget-conscious plan.</p>
+        <div class="chips" aria-label="Capabilities"><span class="chip"><b></b>Flight search</span><span class="chip"><b></b>Hotel research</span><span class="chip"><b></b>AI itinerary</span></div>
+      </div>
+    </section>
+
+    <section class="shell planner" aria-labelledby="planner-title">
+      <div class="planner-top">
+        <div><div class="planner-label">Start planning</div><div class="planner-name" id="planner-title">Where should we take you?</div></div>
+        <div class="agent-badge"><span></span> 3 AGENTS READY</div>
+      </div>
+      <form class="form" id="plan-form">
+        <label for="query">YOUR TRIP BRIEF</label>
+        <textarea id="query" name="query" required minlength="8" maxlength="1200" placeholder="e.g. Plan a 5-day food and culture trip from Delhi to Tokyo for two people. Keep it mid-range."></textarea>
+        <div class="form-footer">
+          <span class="hint">Add your route, duration, interests, and budget.</span>
+          <button class="submit" id="submit" type="submit">Build my route <span class="arrow">→</span></button>
+        </div>
+        <div class="examples"><span>Try one</span><button class="example" type="button">Delhi to Paris for a weekend</button><button class="example" type="button">7 days in Bali from Mumbai</button><button class="example" type="button">Budget trip to Bangkok from Chennai</button></div>
+        <div class="planner-progress" id="planner-progress" aria-live="polite">
+          <div class="progress-meta"><span id="progress-label">Starting travel agents…</span><span id="progress-value">0%</span></div>
+          <div class="progress-track" role="progressbar" aria-label="Itinerary planning progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-stages"><span data-stage="0">Flight search</span><span data-stage="1">Hotel research</span><span data-stage="2">AI itinerary</span></div>
+        </div>
+        <p class="error" id="error" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="result" id="result" aria-live="polite">
+      <div class="result-top"><div><span class="eyebrow"><i></i> Your route is ready</span><h2>Trip blueprint</h2></div><button class="copy" id="copy" type="button">COPY PLAN</button></div>
+      <article class="itinerary" id="itinerary"></article>
+    </section>
+
+    <section class="shell workflow-section" id="how-it-works">
+      <div class="section-top">
+        <div><span class="eyebrow"><i></i> Behind the itinerary</span><h2>One brief. Three focused agents.</h2></div>
+        <p class="section-copy">Each request follows a practical workflow, so the final answer is grounded in flight and hotel research—not just a generic itinerary.</p>
+      </div>
+      <div class="steps">
+        <article class="step"><span class="step-number">01 / FLIGHT AGENT</span><div class="step-icon">✈</div><h3>Maps your route</h3><p>Infers airport codes and finds available flight information for your journey.</p></article>
+        <article class="step"><span class="step-number">02 / HOTEL AGENT</span><div class="step-icon">⌂</div><h3>Researches stays</h3><p>Searches for relevant hotel options shaped by your destination and trip needs.</p></article>
+        <article class="step"><span class="step-number">03 / ITINERARY AGENT</span><div class="step-icon">✦</div><h3>Builds the plan</h3><p>Combines the findings into a simple, budget-aware itinerary you can follow.</p></article>
+      </div>
+    </section>
+
+    <footer class="shell"><span>© 2026 ROUTEWISE · TRAVEL MULTI-AGENT</span><span>BUILT WITH FASTAPI + LANGGRAPH</span></footer>
+  </main>
+  <script>
+    const form = document.getElementById('plan-form');
+    const input = document.getElementById('query');
+    const submit = document.getElementById('submit');
+    const error = document.getElementById('error');
+    const result = document.getElementById('result');
+    const itinerary = document.getElementById('itinerary');
+    const copy = document.getElementById('copy');
+    const progressPanel = document.getElementById('planner-progress');
+    const progressFill = document.getElementById('progress-fill');
+    const progressTrack = document.querySelector('.progress-track');
+    const progressLabel = document.getElementById('progress-label');
+    const progressValue = document.getElementById('progress-value');
+    const stages = [...document.querySelectorAll('[data-stage]')];
+    let progressTimer;
+
+    document.querySelectorAll('.example').forEach((button) => button.addEventListener('click', () => {
+      input.value = button.textContent;
+      input.focus();
+    }));
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const query = input.value.trim();
+      if (query.length < 8) { showError('Please give the planner a little more detail about your trip.'); return; }
+      error.classList.remove('show');
+      result.classList.remove('show');
+      submit.disabled = true;
+      submit.innerHTML = 'Planning your route <span class="arrow">↻</span>';
+      startProgress();
+      try {
+        const response = await fetch('/api/plan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query}) });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || 'Unable to start your itinerary.');
+        }
+        let completed = false;
+        await readPlanStream(response, (eventName, data) => {
+          if (eventName === 'progress') setProgress(data.value, data.label, data.stage);
+          if (eventName === 'complete') {
+            completed = true;
+            renderMarkdown(data.itinerary);
+            finishProgress();
+            result.classList.add('show');
+            result.scrollIntoView({ behavior:'smooth', block:'start' });
+          }
+          if (eventName === 'error') throw new Error(data.detail || 'Unable to create your itinerary.');
+        });
+        if (!completed) throw new Error('The planning stream ended before an itinerary was returned.');
+      } catch (err) { stopProgress(); showError(err.message || 'Something went wrong while planning this trip.'); }
+      finally { submit.disabled = false; submit.innerHTML = 'Build my route <span class="arrow">→</span>'; }
+    });
+
+    function showError(message) { error.textContent = message; error.classList.add('show'); }
+
+    let currentProgress = 0;
+    let currentStage = 0;
+    let currentLabel = '';
+    function setProgress(value, label, stage) {
+      const safeValue = Math.min(100, Math.max(0, Math.round(value)));
+      currentProgress = safeValue;
+      currentStage = stage;
+      currentLabel = label;
+      progressFill.style.width = `${safeValue}%`;
+      progressTrack.setAttribute('aria-valuenow', safeValue);
+      progressValue.textContent = `${safeValue}%`;
+      progressLabel.textContent = label;
+      stages.forEach((item, index) => item.className = index < stage ? 'done' : index === stage ? 'active' : '');
+    }
+
+    function startProgress() {
+      clearInterval(progressTimer);
+      progressPanel.classList.add('show');
+      setProgress(4, 'Connecting to the travel agents…', 0);
+      progressTimer = setInterval(() => {
+        // Keep the interface alive while an external provider is processing.
+        // Real LangGraph node updates replace this value as they arrive.
+        if (currentProgress < 18) setProgress(currentProgress + 1, currentLabel, currentStage);
+      }, 850);
+    }
+
+    function finishProgress() {
+      clearInterval(progressTimer);
+      setProgress(100, 'Your itinerary is ready.', 2);
+      stages.forEach((item) => item.className = 'done');
+      setTimeout(() => progressPanel.classList.remove('show'), 1000);
+    }
+
+    function stopProgress() {
+      clearInterval(progressTimer);
+      setProgress(0, 'Planning paused. You can try again.', 0);
+      setTimeout(() => progressPanel.classList.remove('show'), 1800);
+    }
+
+    async function readPlanStream(response, onEvent) {
+      if (!response.body) throw new Error('Streaming is not supported by this browser.');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+        const events = buffer.split(/\r?\n\r?\n/);
+        buffer = events.pop();
+        events.forEach((packet) => {
+          const lines = packet.split(/\r?\n/);
+          const eventName = lines.find((line) => line.startsWith('event:'))?.slice(6).trim();
+          const rawData = lines.filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trim()).join('');
+          if (eventName && rawData) onEvent(eventName, JSON.parse(rawData));
+        });
+        if (done) break;
+      }
+    }
+
+    // The agent returns Markdown. Escape all source text first, then support the
+    // formatting it uses for itineraries without allowing arbitrary HTML output.
+    function renderMarkdown(markdown) {
+      const inline = (value) => escapeHtml(value)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/_([^_]+)_/g, '<em>$1</em>');
+      const lines = markdown.replace(/\r\n/g, '\n').split('\n');
+      const html = [];
+      let listType = null;
+      let paragraph = [];
+      const closeList = () => { if (listType) { html.push(`</${listType}>`); listType = null; } };
+      const closeParagraph = () => { if (paragraph.length) { html.push(`<p>${paragraph.map(inline).join('<br>')}</p>`); paragraph = []; } };
+      const tableCells = (row) => row.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => inline(cell.trim()));
+      const isTableDivider = (row) => /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(row);
+
+      for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index];
+        const heading = line.match(/^(#{1,4})\s+(.+)$/);
+        const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
+        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (line.includes('|') && index + 1 < lines.length && isTableDivider(lines[index + 1])) {
+          closeParagraph(); closeList();
+          const headers = tableCells(line);
+          const rows = [];
+          index += 2;
+          while (index < lines.length && lines[index].includes('|') && lines[index].trim()) {
+            if (!isTableDivider(lines[index])) rows.push(tableCells(lines[index]));
+            index += 1;
+          }
+          index -= 1;
+          html.push(`<div class="table-wrap"><table><thead><tr>${headers.map((cell) => `<th>${cell}</th>`).join('')}</tr></thead><tbody>${rows.map((cells) => `<tr>${headers.map((_, cellIndex) => `<td>${cells[cellIndex] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
+        } else if (/^\s*([-*_])\1\1+\s*$/.test(line)) { closeParagraph(); closeList(); html.push('<hr>'); }
+        else if (heading) { closeParagraph(); closeList(); const level = heading[1].length; html.push(`<h${level}>${inline(heading[2])}</h${level}>`); }
+        else if (unordered || ordered) {
+          closeParagraph(); const type = unordered ? 'ul' : 'ol';
+          if (listType && listType !== type) closeList();
+          if (!listType) { html.push(`<${type}>`); listType = type; }
+          html.push(`<li>${inline((unordered || ordered)[1])}</li>`);
+        } else if (!line.trim()) { closeParagraph(); closeList(); }
+        else { closeList(); paragraph.push(line); }
+      }
+      closeParagraph(); closeList();
+      itinerary.innerHTML = html.join('') || '<p>No itinerary was returned.</p>';
+    }
+
+    function escapeHtml(value) { return value.replace(/[&<>'"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[character]); }
+    copy.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(itinerary.innerText);
+      copy.textContent = 'COPIED!';
+      setTimeout(() => copy.textContent = 'COPY PLAN', 1600);
+    });
+  </script>
+</body>
+</html>
