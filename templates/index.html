@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Routewise is an AI travel planner that turns a trip idea into a flight-aware, hotel-researched itinerary.">
-  <title>Routewise — AI travel planning, mapped out</title>
+  <meta name="description" content="LazyPlan is a playful AI travel planner that turns one trip idea into a flight-aware, weather-ready, budget-conscious itinerary.">
+  <title>LazyPlan — Your delightfully lazy AI trip planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=DM+Mono:wght@400;500&family=Fredoka:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
   <style>
     :root { --bg:#08090b; --surface:#111317; --surface-2:#15181d; --text:#f4f4f5; --muted:#a1a1aa; --dim:#7f8389; --orange:#ff5722; --orange-dark:#c23800; --green:#34d399; --line:rgba(255,255,255,.1); }
     * { box-sizing:border-box; }
@@ -21,10 +21,14 @@
     .brand { display:flex; align-items:center; gap:11px; font-size:16px; font-weight:600; letter-spacing:-.02em; }
     .mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--orange),var(--orange-dark)); color:#1a0b05; box-shadow:0 9px 24px rgba(255,87,34,.28),inset 0 1px rgba(255,255,255,.3); }
     .nav-status { display:flex; align-items:center; gap:8px; color:#c3c5ca; font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.06em; }
+    .nav-actions { display:flex; align-items:center; gap:10px; }
+    .new-thread { cursor:pointer; padding:9px 12px; border:1px solid rgba(255,255,255,.14); border-radius:999px; background:var(--surface); color:#e4e4e7; font:500 11px "JetBrains Mono",monospace; letter-spacing:.04em; transition:border .2s,background .2s; }
+    .new-thread:hover { border-color:rgba(255,87,34,.6); background:#1d1511; }
+    .new-thread:disabled { cursor:wait; opacity:.55; }
     .pulse { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(52,211,153,.45); animation:pulse 2s infinite; }
     @keyframes pulse { 70% { box-shadow:0 0 0 7px rgba(52,211,153,0); } 100% { box-shadow:0 0 0 0 rgba(52,211,153,0); } }
     .hero { position:relative; padding:52px 0 34px; }
-    .hero::before { content:"ROUTEWISE"; position:absolute; top:70px; left:50%; transform:translateX(-50%); font-size:clamp(76px,17vw,220px); font-weight:700; letter-spacing:-.075em; color:rgba(255,255,255,.018); white-space:nowrap; pointer-events:none; }
+    .hero::before { content:"LAZYPLAN"; position:absolute; top:70px; left:50%; transform:translateX(-50%); font-size:clamp(76px,17vw,220px); font-weight:700; letter-spacing:-.075em; color:rgba(255,255,255,.018); white-space:nowrap; pointer-events:none; }
     .glow { position:absolute; width:600px; height:400px; top:-90px; left:43%; border-radius:50%; background:radial-gradient(ellipse,rgba(255,87,34,.15),transparent 67%); filter:blur(12px); pointer-events:none; }
     .hero-content { position:relative; z-index:1; max-width:770px; }
     .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:8px 11px; border:1px solid rgba(255,255,255,.15); border-radius:999px; background:rgba(17,19,23,.72); color:#c3c5ca; font:500 10px "JetBrains Mono",monospace; letter-spacing:.11em; text-transform:uppercase; }
@@ -36,12 +40,21 @@
     .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:22px; }
     .chip { display:inline-flex; gap:8px; align-items:center; padding:9px 13px; border:1px solid rgba(255,255,255,.16); border-radius:999px; background:rgba(0,0,0,.18); color:#e4e4e7; font-size:13px; }
     .chip b { width:5px; height:5px; border-radius:50%; background:var(--orange); }
+    .system-strip { position:relative; z-index:2; display:grid; grid-template-columns:1.25fr repeat(3,1fr); gap:10px; margin:0 auto 30px; }
+    .system-card { min-height:104px; padding:16px; border:1px solid var(--line); border-radius:14px; background:rgba(17,19,23,.8); }
+    .system-card.featured { background:linear-gradient(135deg,#20140f,#111317); border-color:rgba(255,87,34,.28); }
+    .system-label { display:flex; align-items:center; gap:7px; color:#8d9197; font:500 10px "JetBrains Mono",monospace; letter-spacing:.09em; text-transform:uppercase; }
+    .system-label b { width:5px; height:5px; border-radius:50%; background:var(--orange); }
+    .system-value { margin-top:14px; color:#f4f4f5; font-size:18px; font-weight:600; letter-spacing:-.025em; }
+    .system-detail { margin-top:5px; color:#8e9298; font-size:12px; line-height:1.35; }
     .planner { position:relative; z-index:4; padding:20px; border:1px solid rgba(255,255,255,.12); border-radius:22px; background:rgba(17,19,23,.93); box-shadow:0 40px 100px -32px rgba(0,0,0,.85); }
     .planner-top { display:flex; justify-content:space-between; align-items:center; padding:0 2px 15px; border-bottom:1px solid var(--line); }
     .planner-label { font:500 10px "JetBrains Mono",monospace; letter-spacing:.11em; color:var(--dim); text-transform:uppercase; }
     .planner-name { margin-top:5px; font-size:17px; font-weight:600; letter-spacing:-.02em; }
     .agent-badge { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:#c3c5ca; font:500 10px "JetBrains Mono",monospace; }
     .agent-badge span { width:6px; height:6px; border-radius:50%; background:var(--green); }
+    .thread-context { display:flex; align-items:center; gap:7px; margin-top:9px; color:#74777d; font:10px "JetBrains Mono",monospace; }
+    .thread-context b { color:#d3d4d7; font-weight:500; }
     .form { padding-top:17px; }
     label { display:block; margin-bottom:8px; font:500 11px "JetBrains Mono",monospace; color:#c3c5ca; letter-spacing:.06em; }
     textarea { display:block; width:100%; min-height:92px; resize:vertical; padding:15px 16px; border:1px solid rgba(255,255,255,.13); border-radius:13px; outline:none; background:#0b0c0f; color:#f4f4f5; line-height:1.55; transition:border .2s,box-shadow .2s; }
@@ -72,11 +85,11 @@
     .section-top { display:flex; justify-content:space-between; align-items:end; gap:30px; margin-bottom:23px; }
     h2 { margin:12px 0 0; max-width:520px; font-size:clamp(31px,4vw,49px); line-height:.98; letter-spacing:-.045em; font-weight:600; }
     .section-copy { max-width:300px; color:var(--muted); font-size:14px; line-height:1.55; }
-    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-    .step { position:relative; min-height:195px; padding:21px; border:1px solid var(--line); border-radius:16px; background:var(--surface); overflow:hidden; }
+    .steps { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .step { position:relative; min-height:218px; padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--surface); overflow:hidden; }
     .step:hover { border-color:rgba(255,87,34,.35); }
     .step-number { color:var(--orange); font:500 11px "JetBrains Mono",monospace; letter-spacing:.08em; }
-    .step-icon { display:grid; place-items:center; width:38px; height:38px; margin:24px 0 18px; border-radius:11px; background:#21150f; color:var(--orange); }
+    .step-icon { display:grid; place-items:center; width:38px; height:38px; margin:22px 0 17px; border-radius:11px; background:#21150f; color:var(--orange); }
     .step h3 { margin:0; font-size:17px; letter-spacing:-.02em; }
     .step p { margin:7px 0 0; color:var(--muted); font-size:13px; line-height:1.5; }
     .step::after { content:""; position:absolute; right:-50px; bottom:-70px; width:150px; height:150px; border-radius:50%; background:rgba(255,87,34,.08); filter:blur(10px); }
@@ -108,37 +121,194 @@
     .itinerary tr:last-child td { color:#fff; font-weight:600; }
     .itinerary th + th, .itinerary td + td { border-left:1px solid rgba(255,255,255,.06); }
     .itinerary a { color:#ff9a79; text-decoration:underline; }
+    .approval-panel { display:none; margin-top:18px; padding:18px; border:1px solid rgba(255,159,125,.3); border-radius:15px; background:rgba(255,87,34,.06); }
+    .approval-panel.show { display:block; animation:reveal .3s ease-out; }
+    .approval-panel h3 { margin:0 0 5px; font-size:18px; letter-spacing:-.02em; }
+    .approval-panel p { margin:0 0 14px; color:#c3c5ca; font-size:13px; line-height:1.5; }
+    .approval-panel textarea { min-height:78px; margin:0 0 12px; }
+    .approval-actions { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; }
+    .approval-actions > span { color:#a1a1aa; font-size:12px; }
+    .approval-buttons { display:flex; gap:9px; }
+    .approve, .revise { cursor:pointer; border-radius:999px; padding:10px 14px; font-size:12px; font-weight:700; }
+    .approve { border:0; background:var(--orange); color:#1a0b05; }
+    .revise { border:1px solid rgba(255,255,255,.17); background:transparent; color:#f4f4f5; }
+    .thread-note { margin:14px 0 0; color:#777b82; font:10px "JetBrains Mono",monospace; line-height:1.5; }
+    .live-flow { position:relative; z-index:2; margin:14px auto 0; padding:18px; border:1px solid rgba(255,255,255,.1); border-radius:17px; background:rgba(17,19,23,.74); }
+    .live-flow-top { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; }
+    .live-flow h3 { margin:5px 0 0; font-size:18px; letter-spacing:-.025em; }
+    .flow-status { display:inline-flex; align-items:center; gap:7px; padding:7px 9px; border:1px solid var(--line); border-radius:999px; background:#0d0f12; color:#9ca0a6; font:500 10px "JetBrains Mono",monospace; }
+    .flow-status i { width:6px; height:6px; border-radius:50%; background:#74777d; }
+    .flow-status.live { color:#ffc0aa; border-color:rgba(255,87,34,.35); }
+    .flow-status.live i { background:var(--orange); box-shadow:0 0 10px rgba(255,87,34,.7); }
+    .flow-status.waiting { color:#fde68a; border-color:rgba(253,230,138,.3); }
+    .flow-status.waiting i { background:#fbbf24; }
+    .agent-roster { display:flex; flex-wrap:wrap; gap:7px; margin-top:16px; }
+    .agent-pill { padding:7px 9px; border:1px solid var(--line); border-radius:8px; background:#0d0f12; color:#71757b; font:500 10px "JetBrains Mono",monospace; letter-spacing:.03em; transition:color .2s,border .2s,background .2s; }
+    .agent-pill.selected { color:#ffe3d8; border-color:rgba(255,87,34,.42); background:rgba(255,87,34,.1); }
+    .agent-pill.selected::before { content:"✓ "; color:var(--orange); }
+    .flow-track { display:grid; grid-template-columns:repeat(7, minmax(104px,1fr)); gap:8px; margin-top:17px; overflow-x:auto; padding-bottom:2px; }
+    .flow-node { min-width:104px; padding:10px; border:1px solid var(--line); border-radius:10px; background:#0d0f12; color:#72767c; transition:border .25s,background .25s,color .25s; }
+    .flow-node small { display:block; color:inherit; font:500 9px "JetBrains Mono",monospace; letter-spacing:.06em; text-transform:uppercase; }
+    .flow-node span { display:block; margin-top:5px; font-size:12px; font-weight:600; }
+    .flow-node.active { color:#ffd3c4; border-color:rgba(255,87,34,.5); background:rgba(255,87,34,.08); }
+    .flow-node.completed { color:#d1fae5; border-color:rgba(52,211,153,.32); background:rgba(52,211,153,.055); }
+    .flow-node.waiting { color:#fef3c7; border-color:rgba(251,191,36,.4); background:rgba(251,191,36,.07); }
+    .flow-summary { min-height:18px; margin:13px 1px 0; color:#8f9399; font-size:12px; line-height:1.45; }
     .error { display:none; margin-top:12px; padding:11px 13px; border-radius:9px; border:1px solid rgba(248,113,113,.32); background:rgba(127,29,29,.16); color:#fecaca; font-size:13px; }
     .error.show { display:block; }
     footer { display:flex; justify-content:space-between; gap:16px; padding:25px 0 35px; border-top:1px solid var(--line); color:var(--dim); font:10px "JetBrains Mono",monospace; letter-spacing:.06em; }
     footer span:last-child { color:var(--orange); }
     .plane-svg { width:18px; height:18px; }
-    @media (max-width:700px) { .shell { width:min(100% - 28px,1180px); } .nav { padding:17px 0; } .nav-status { font-size:9px; } .hero { padding:42px 0 28px; } h1 { font-size:52px; } .lead { font-size:15px; } .form-footer { align-items:flex-end; } .hint { max-width:130px; line-height:1.4; } .workflow-section { padding-top:52px; } .section-top { align-items:start; flex-direction:column; gap:15px; } .steps { grid-template-columns:1fr; } .step { min-height:158px; } .step-icon { margin:18px 0 13px; } footer { flex-direction:column; } }
+    @media (max-width:900px) { .system-strip { grid-template-columns:repeat(2,1fr); } .system-card.featured { grid-column:span 2; } .steps { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:700px) { .shell { width:min(100% - 28px,1180px); } .nav { padding:17px 0; } .nav-status { display:none; } .new-thread { padding:8px 10px; font-size:10px; } .hero { padding:42px 0 24px; } h1 { font-size:52px; } .lead { font-size:15px; } .system-strip { grid-template-columns:1fr; margin-bottom:24px; } .system-card.featured { grid-column:auto; } .form-footer { align-items:flex-end; } .hint { max-width:130px; line-height:1.4; } .workflow-section { padding-top:52px; } .section-top { align-items:start; flex-direction:column; gap:15px; } .steps { grid-template-columns:1fr; } .step { min-height:158px; } .step-icon { margin:18px 0 13px; } footer { flex-direction:column; } }
+
+    /* Playful illustrated theme — keeps the application behavior unchanged. */
+    :root { --bg:#fff7e5; --surface:#fffdf5; --surface-2:#f7ecd2; --text:#24342b; --muted:#536257; --dim:#748072; --orange:#e4774e; --orange-dark:#c45b3c; --green:#6b8052; --line:#2e4638; --ink:#24342b; --sun:#f5c95a; --sky:#cbe4de; }
+    body { color:var(--ink); background:var(--bg); font-family:"Nunito Sans",Arial,sans-serif; font-weight:500; line-height:1.55; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    body::before { z-index:20; opacity:.18; background-image:url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); }
+    body::after { content:""; position:fixed; z-index:-1; inset:0; background:radial-gradient(circle at 8% 12%,rgba(245,201,90,.42) 0 7%,transparent 22%),radial-gradient(circle at 92% 28%,rgba(203,228,222,.75) 0 9%,transparent 27%),linear-gradient(180deg,#fffaf0,#f7edd7); }
+    .shell { width:min(1220px,calc(100% - 36px)); }
+    .nav { padding:22px 0; }
+    .brand { font-family:"Fredoka",sans-serif; font-size:21px; font-weight:700; color:var(--ink); letter-spacing:-.035em; }
+    .brand-word span { color:var(--orange-dark); }
+    .mark { width:40px; height:40px; border:2px solid var(--ink); border-radius:48% 52% 44% 56%; background:var(--sun); color:var(--ink); box-shadow:3px 3px 0 var(--ink); transform:rotate(-6deg); font-family:"Fredoka",sans-serif; font-size:15px; font-weight:700; letter-spacing:-.08em; }
+    .brand:hover .mark { animation:brand-wiggle .45s ease-in-out; }
+    @keyframes brand-wiggle { 25% { transform:rotate(7deg) scale(1.06); } 60% { transform:rotate(-9deg) scale(1.06); } }
+    .nav-status { color:var(--ink); font-family:"DM Mono",monospace; font-size:10px; }
+    .pulse { background:var(--green); }
+    .new-thread { border:2px solid var(--ink); border-radius:12px 11px 13px 10px; background:#fffdf5; color:var(--ink); font-family:"Fredoka",sans-serif; font-weight:600; box-shadow:3px 3px 0 var(--ink); }
+    .new-thread:hover { border-color:var(--ink); color:var(--ink); background:var(--sun); transform:translate(1px,1px); box-shadow:1px 1px 0 var(--ink); }
+    .hero { min-height:445px; padding:65px 0 48px; overflow:hidden; }
+    .hero::before { content:"NAP. PACK. GO!"; top:38px; left:auto; right:0; transform:rotate(8deg); color:rgba(46,70,56,.08); font-family:"Fredoka",sans-serif; font-size:clamp(64px,11vw,158px); font-weight:700; letter-spacing:-.065em; }
+    .glow { width:520px; height:330px; top:36px; left:auto; right:-60px; background:radial-gradient(ellipse,rgba(245,201,90,.72),transparent 66%); filter:none; }
+    .hero-content { max-width:680px; }
+    .eyebrow { border:2px solid var(--ink); border-radius:11px 14px 10px 13px; background:#fffdf5; color:var(--ink); font-family:"DM Mono",monospace; box-shadow:2px 2px 0 rgba(36,52,43,.45); }
+    .eyebrow i { width:7px; height:7px; background:var(--orange); }
+    h1 { color:var(--ink); font-family:"Fredoka",sans-serif; font-weight:700; font-size:clamp(55px,7.5vw,95px); letter-spacing:-.055em; line-height:.94; }
+    h1 .muted { color:var(--green); }
+    h1 .accent { background:none; color:var(--orange); font-family:"Caveat",cursive; font-size:1.22em; letter-spacing:-.08em; }
+    .lead { color:#405246; font-size:18px; font-weight:600; line-height:1.65; max-width:570px; }
+    .chips { gap:10px; }
+    .chip { border:2px solid var(--ink); border-radius:14px 11px 13px 10px; background:#fffdf5; color:var(--ink); font-weight:800; box-shadow:2px 2px 0 rgba(36,52,43,.7); }
+    .chip:nth-child(even) { transform:rotate(-1.2deg); background:#eef2dc; }
+    .chip:nth-child(3n) { transform:rotate(1.2deg); background:#fbe5bd; }
+    .chip b { width:6px; height:6px; background:var(--orange); }
+    .travel-buddy { position:absolute; z-index:1; right:4%; bottom:20px; width:min(34vw,330px); filter:drop-shadow(5px 6px 0 rgba(36,52,43,.18)); transform:rotate(2deg); animation:bob 4.2s ease-in-out infinite; }
+    .travel-buddy .sticker { fill:#fffdf5; stroke:var(--ink); stroke-width:2.5; }
+    .travel-buddy .accent-fill { fill:var(--orange); stroke:var(--ink); stroke-width:2.5; }
+    .travel-buddy .leaf { fill:#97ad78; stroke:var(--ink); stroke-width:2.5; }
+    @keyframes bob { 50% { transform:rotate(-2deg) translateY(-9px); } }
+    .system-strip { gap:13px; margin-bottom:34px; }
+    .system-card { min-height:122px; border:2px solid var(--ink); border-radius:18px 15px 18px 14px; background:#fffdf5; box-shadow:4px 4px 0 var(--ink); transform:rotate(-.5deg); }
+    .system-card:nth-child(even) { transform:rotate(.7deg); background:#eef2dc; }
+    .system-card:nth-child(3) { background:#cbe4de; }
+    .system-card.featured { background:#fbe5bd; border-color:var(--ink); }
+    .system-label { color:#506054; font-family:"DM Mono",monospace; }
+    .system-label b { width:7px; height:7px; background:var(--orange); }
+    .system-value { color:var(--ink); font-family:"Fredoka",sans-serif; font-size:20px; font-weight:600; }
+    .system-detail { color:#4d5d50; font-weight:600; }
+    .planner,.live-flow { border:2px solid var(--ink); background:#fffdf5; box-shadow:5px 5px 0 var(--ink); }
+    .planner { border-radius:22px 18px 22px 18px; }
+    .planner-top { border-bottom:2px dashed #9aab8d; }
+    .planner-label,label,.thread-context,.hint,.examples > span,.thread-note { color:#536257; font-family:"DM Mono",monospace; }
+    .planner-name { color:var(--ink); font-family:"Fredoka",sans-serif; font-size:20px; font-weight:600; }
+    .agent-badge { border:2px solid var(--ink); background:#eef2dc; color:var(--ink); font-family:"DM Mono",monospace; }
+    textarea { border:2px solid var(--ink); border-radius:14px 16px 13px 15px; background:#fffaf0; color:var(--ink); font-family:"Nunito Sans",sans-serif; font-size:16px; font-weight:600; }
+    textarea::placeholder { color:#849183; }
+    textarea:focus { border-color:var(--ink); box-shadow:4px 4px 0 var(--sun); }
+    .submit,.approve { border:2px solid var(--ink); border-radius:14px 12px 15px 11px; background:var(--orange); color:var(--ink); box-shadow:4px 4px 0 var(--ink); font-family:"Fredoka",sans-serif; font-weight:600; }
+    .submit:hover { background:#f08b60; box-shadow:2px 2px 0 var(--ink); transform:translate(2px,2px); }
+    .arrow { background:var(--ink); color:#fffdf5; }
+    .example,.copy,.revise { border:2px solid var(--ink); background:#fffdf5; color:var(--ink); box-shadow:2px 2px 0 rgba(36,52,43,.6); font-family:"Nunito Sans",sans-serif; font-weight:800; }
+    .example:hover,.copy:hover,.revise:hover { border-color:var(--ink); color:var(--ink); background:#fbe5bd; }
+    .planner-progress { border:2px solid var(--ink); border-radius:15px; background:#fbe5bd; }
+    .progress-meta { color:var(--ink); font-family:"DM Mono",monospace; }
+    .progress-meta span:last-child { color:var(--orange-dark); }
+    .progress-track { background:#fffdf5; border:1px solid var(--ink); }
+    .progress-fill { background:repeating-linear-gradient(-45deg,var(--orange) 0 12px,#f8a77d 12px 24px); box-shadow:none; }
+    .progress-stages { color:#63715f; font-family:"DM Mono",monospace; }
+    .progress-stages span.active { color:var(--orange-dark); }
+    .progress-stages span.done { color:var(--green); }
+    .live-flow { border-radius:17px 22px 16px 21px; background:#eef2dc; }
+    .live-flow h3,.approval-panel h3 { color:var(--ink); font-family:"Fredoka",sans-serif; }
+    .flow-status { border:2px solid var(--ink); background:#fffdf5; color:var(--ink); font-family:"DM Mono",monospace; }
+    .agent-pill,.flow-node { border:2px solid var(--ink); background:#fffdf5; color:#516053; font-family:"DM Mono",monospace; }
+    .agent-pill.selected { color:var(--ink); border-color:var(--ink); background:#fbe5bd; }
+    .agent-pill.selected::before { color:var(--orange-dark); }
+    .flow-node.completed { color:var(--ink); border-color:var(--ink); background:#cbe4de; }
+    .flow-node.waiting { color:var(--ink); border-color:var(--ink); background:#fbe5bd; }
+    .flow-summary { color:#425347; font-weight:700; }
+    .workflow-section { padding-top:78px; }
+    h2 { color:var(--ink); font-family:"Fredoka",sans-serif; font-size:clamp(34px,4vw,55px); font-weight:600; line-height:1.06; }
+    .section-copy { color:#4d5d50; font-weight:600; }
+    .step { border:2px solid var(--ink); border-radius:18px 13px 17px 14px; background:#fffdf5; box-shadow:3px 3px 0 var(--ink); }
+    .step:nth-child(2n) { background:#eef2dc; transform:rotate(.6deg); }
+    .step:nth-child(3n) { background:#cbe4de; transform:rotate(-.5deg); }
+    .step:hover { border-color:var(--ink); transform:translate(-2px,-3px) rotate(-1deg); box-shadow:6px 7px 0 var(--ink); }
+    .step-number { color:var(--orange-dark); font-family:"DM Mono",monospace; }
+    .step-icon { border:2px solid var(--ink); border-radius:50% 46% 52% 44%; background:#fbe5bd; color:var(--ink); font-size:20px; }
+    .step h3 { color:var(--ink); font-family:"Fredoka",sans-serif; font-weight:600; }
+    .step p { color:#435447; font-weight:600; }
+    .step::after { background:rgba(245,201,90,.2); }
+    .result { border:2px solid var(--ink); border-radius:24px 18px 25px 19px; background:#fffdf5; box-shadow:6px 6px 0 var(--ink); }
+    .result h2,.itinerary h1,.itinerary h2,.itinerary h3,.itinerary h4 { color:var(--ink); font-family:"Fredoka",sans-serif; font-weight:600; letter-spacing:-.025em; }
+    .itinerary { border:2px solid var(--ink); border-radius:16px 18px 15px 17px; background:#fffaf0; color:#35483b; font-weight:600; }
+    .itinerary strong { color:var(--ink); }
+    .itinerary h2 { border-bottom:2px dashed #9aab8d; }
+    .itinerary li::marker { color:var(--orange); }
+    .table-wrap { border:2px solid var(--ink); }
+    .itinerary th { background:#cbe4de; color:var(--ink); font-family:"DM Mono",monospace; }
+    .itinerary td { color:#35483b; border-color:#c9d1c0; }
+    .approval-panel { border:2px solid var(--ink); background:#fbe5bd; }
+    .approval-panel p,.approval-actions > span { color:#425347; font-weight:700; }
+    .error { border:2px solid var(--ink); background:#ffd7c9; color:var(--ink); font-weight:700; }
+    footer { border-top:2px dashed #93a285; color:#506054; font-family:"DM Mono",monospace; }
+    footer span:last-child { color:var(--orange-dark); }
+    @media (max-width:700px) { .travel-buddy { opacity:.35; right:-34px; bottom:30px; width:230px; } .hero-content { max-width:100%; } .system-card,.step:nth-child(2n),.step:nth-child(3n) { transform:none; } }
   </style>
 </head>
 <body>
   <main>
     <div class="shell nav">
-      <a class="brand" href="#top" aria-label="Routewise home">
-        <span class="mark">⌁</span><span>Routewise</span>
+      <a class="brand" href="#top" aria-label="LazyPlan home">
+        <span class="mark">Zz</span><span class="brand-word">Lazy<span>Plan</span></span>
       </a>
-      <div class="nav-status"><span class="pulse"></span>AI PLANNER ONLINE</div>
+      <div class="nav-actions"><div class="nav-status"><span class="pulse"></span>AI PLANNER ONLINE</div><button class="new-thread" id="new-thread" type="button">NEW TRIP</button></div>
     </div>
 
     <section class="shell hero" id="top">
       <div class="glow"></div>
+      <svg class="travel-buddy" viewBox="0 0 360 300" aria-hidden="true">
+        <path class="sticker" d="M34 232c7-49 36-80 79-92 10-39 42-67 85-67 43 0 76 27 86 65 31 8 52 36 52 70 0 41-32 74-74 74H87c-33 0-58-22-53-50Z"/>
+        <path class="leaf" d="M43 220c8-39 34-65 69-75-2 34-24 69-69 75Zm251-66c35 12 53 42 48 77-34-12-51-43-48-77Z"/>
+        <path class="accent-fill" d="M119 126h119c15 0 27 12 27 27v82c0 15-12 27-27 27H119c-15 0-27-12-27-27v-82c0-15 12-27 27-27Z"/>
+        <path class="sticker" d="M137 126v-20c0-22 18-40 40-40h4c22 0 40 18 40 40v20" fill="none"/>
+        <path class="sticker" d="M126 158h104v61H126z"/>
+        <path d="M146 179h21m17 0h21M161 196h35" fill="none" stroke="#24342b" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="280" cy="83" r="23" fill="#f5c95a" stroke="#24342b" stroke-width="2.5"/>
+        <path d="m273 83 8 8 13-17" fill="none" stroke="#24342b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M46 83c27-18 53-9 63 8-23 11-43 10-63-8Zm205-40c15-15 33-13 44-2-12 13-28 16-44 2Z" fill="#cbe4de" stroke="#24342b" stroke-width="2.5"/>
+        <path d="M51 271c61 16 180 16 260 0" fill="none" stroke="#6b8052" stroke-width="3" stroke-linecap="round" stroke-dasharray="3 9"/>
+      </svg>
       <div class="hero-content">
         <span class="eyebrow"><i></i> Multi-agent travel system</span>
-        <h1>Travel less<br><span class="muted">messy.</span> Plan <span class="accent">more.</span></h1>
-        <p class="lead">A flight-aware, hotel-researched itinerary planner that turns one trip idea into a clear route, stay options, and a budget-conscious plan.</p>
-        <div class="chips" aria-label="Capabilities"><span class="chip"><b></b>Flight search</span><span class="chip"><b></b>Hotel research</span><span class="chip"><b></b>AI itinerary</span></div>
+        <h1>Pack <span class="accent">happy.</span><br><span class="muted">We’ll do</span> the thinking.</h1>
+        <p class="lead">A tiny crew of travel agents that chases flights, stays, weather, and budgets—then lets you be the final boss.</p>
+        <div class="chips" aria-label="Capabilities"><span class="chip"><b></b>Flight search</span><span class="chip"><b></b>Hotel research</span><span class="chip"><b></b>Weather-aware</span><span class="chip"><b></b>Budget planning</span><span class="chip"><b></b>Human review</span></div>
       </div>
+    </section>
+
+    <section class="shell system-strip" aria-label="Travel planning system features">
+      <article class="system-card featured"><div class="system-label"><b></b> LangGraph workflow</div><div class="system-value">Multi-agent, not one-shot.</div><div class="system-detail">A supervisor selects the research agents each trip actually needs.</div></article>
+      <article class="system-card"><div class="system-label"><b></b> Live status</div><div class="system-value">SSE streaming</div><div class="system-detail">See each planning phase as the graph progresses.</div></article>
+      <article class="system-card"><div class="system-label"><b></b> Checkpointed</div><div class="system-value">HITL review</div><div class="system-detail">Approve or revise the draft before the final response.</div></article>
+      <article class="system-card"><div class="system-label"><b></b> Thread safety</div><div class="system-value">Fresh trip IDs</div><div class="system-detail">Reset a trip only with an explicit permanent-delete confirmation.</div></article>
     </section>
 
     <section class="shell planner" aria-labelledby="planner-title">
       <div class="planner-top">
-        <div><div class="planner-label">Start planning</div><div class="planner-name" id="planner-title">Where should we take you?</div></div>
-        <div class="agent-badge"><span></span> 3 AGENTS READY</div>
+        <div><div class="planner-label">Start planning</div><div class="planner-name" id="planner-title">Where should we take you?</div><div class="thread-context">ACTIVE THREAD · <b id="thread-short">CREATING…</b></div></div>
+        <div class="agent-badge"><span></span> 4 AGENTS + HITL</div>
       </div>
       <form class="form" id="plan-form">
         <label for="query">YOUR TRIP BRIEF</label>
@@ -151,30 +321,45 @@
         <div class="planner-progress" id="planner-progress" aria-live="polite">
           <div class="progress-meta"><span id="progress-label">Starting travel agents…</span><span id="progress-value">0%</span></div>
           <div class="progress-track" role="progressbar" aria-label="Itinerary planning progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="progress-stages"><span data-stage="0">Flight search</span><span data-stage="1">Hotel research</span><span data-stage="2">AI itinerary</span></div>
+          <div class="progress-stages"><span data-stage="0">Trip checks</span><span data-stage="1">Research</span><span data-stage="2">Weather + budget</span><span data-stage="3">Review</span></div>
         </div>
+        <p class="thread-note">Starting a new trip permanently destroys the current trip thread. It cannot be recovered.</p>
         <p class="error" id="error" role="alert"></p>
       </form>
     </section>
 
+    <section class="shell live-flow" aria-label="Live LangGraph workflow">
+      <div class="live-flow-top"><div><span class="eyebrow"><i></i> Live execution</span><h3>Graph activity</h3></div><span class="flow-status" id="flow-status"><i></i><span id="flow-status-text">Waiting for a trip</span></span></div>
+      <div class="agent-roster" aria-label="Agents selected by supervisor"><span class="agent-pill" data-agent="flight">FLIGHT AGENT</span><span class="agent-pill" data-agent="hotel">HOTEL AGENT</span><span class="agent-pill" data-agent="weather">WEATHER AGENT</span><span class="agent-pill" data-agent="budget">BUDGET AGENT</span></div>
+      <div class="flow-track" aria-label="Workflow node status"><div class="flow-node" data-flow="gaurdrail"><small>01</small><span>Guardrail</span></div><div class="flow-node" data-flow="supervisor"><small>02</small><span>Supervisor</span></div><div class="flow-node" data-flow="research"><small>03</small><span>Research</span></div><div class="flow-node" data-flow="weather_budget"><small>04</small><span>Context</span></div><div class="flow-node" data-flow="iternary"><small>05</small><span>Draft</span></div><div class="flow-node" data-flow="human_approval"><small>06</small><span>Your review</span></div><div class="flow-node" data-flow="final"><small>07</small><span>Final plan</span></div></div>
+      <p class="flow-summary" id="flow-summary">The selected agents and real graph steps will appear here once planning starts.</p>
+    </section>
+
     <section class="result" id="result" aria-live="polite">
-      <div class="result-top"><div><span class="eyebrow"><i></i> Your route is ready</span><h2>Trip blueprint</h2></div><button class="copy" id="copy" type="button">COPY PLAN</button></div>
+      <div class="result-top"><div><span class="eyebrow"><i></i><span id="result-kicker">Your route is ready</span></span><h2 id="result-title">Trip blueprint</h2></div><button class="copy" id="copy" type="button">COPY PLAN</button></div>
       <article class="itinerary" id="itinerary"></article>
+      <section class="approval-panel" id="approval-panel" aria-live="polite">
+        <h3>Review this itinerary</h3><p id="approval-copy">Approve it to create the final response, or send feedback to revise it.</p>
+        <textarea id="feedback" maxlength="1200" placeholder="Optional feedback — e.g. make the plan more budget-friendly or add more museums."></textarea>
+        <div class="approval-actions"><span>Your feedback will update this same trip thread.</span><div class="approval-buttons"><button class="revise" id="revise" type="button">Revise plan</button><button class="approve" id="approve" type="button">Approve plan</button></div></div>
+      </section>
     </section>
 
     <section class="shell workflow-section" id="how-it-works">
       <div class="section-top">
-        <div><span class="eyebrow"><i></i> Behind the itinerary</span><h2>One brief. Three focused agents.</h2></div>
-        <p class="section-copy">Each request follows a practical workflow, so the final answer is grounded in flight and hotel research—not just a generic itinerary.</p>
+        <div><span class="eyebrow"><i></i> Behind the itinerary</span><h2>One brief. A reviewed travel system.</h2></div>
+        <p class="section-copy">Your request is checked, routed to specialised agents, streamed live, and paused for your approval before the final response.</p>
       </div>
       <div class="steps">
-        <article class="step"><span class="step-number">01 / FLIGHT AGENT</span><div class="step-icon">✈</div><h3>Maps your route</h3><p>Infers airport codes and finds available flight information for your journey.</p></article>
-        <article class="step"><span class="step-number">02 / HOTEL AGENT</span><div class="step-icon">⌂</div><h3>Researches stays</h3><p>Searches for relevant hotel options shaped by your destination and trip needs.</p></article>
-        <article class="step"><span class="step-number">03 / ITINERARY AGENT</span><div class="step-icon">✦</div><h3>Builds the plan</h3><p>Combines the findings into a simple, budget-aware itinerary you can follow.</p></article>
+        <article class="step"><span class="step-number">01 / GUARDRAIL</span><div class="step-icon">✓</div><h3>Checks the brief</h3><p>Validates that the travel request is safe and contains a clear destination.</p></article>
+        <article class="step"><span class="step-number">02 / SUPERVISOR</span><div class="step-icon">⌘</div><h3>Routes the work</h3><p>Extracts trip constraints and selects only the agents needed for this trip.</p></article>
+        <article class="step"><span class="step-number">03 / RESEARCH</span><div class="step-icon">✈</div><h3>Finds the facts</h3><p>Flight and hotel agents use tools to ground the itinerary in live research.</p></article>
+        <article class="step"><span class="step-number">04 / CONTEXT</span><div class="step-icon">☼</div><h3>Adapts the plan</h3><p>Weather and budget agents shape activities, timing, and cost expectations.</p></article>
+        <article class="step"><span class="step-number">05 / HITL</span><div class="step-icon">↺</div><h3>You decide</h3><p>Review the draft, approve it, or send feedback to revise the same thread.</p></article>
       </div>
     </section>
 
-    <footer class="shell"><span>© 2026 ROUTEWISE · TRAVEL MULTI-AGENT</span><span>BUILT WITH FASTAPI + LANGGRAPH</span></footer>
+    <footer class="shell"><span>© 2026 LAZYPLAN · YOUR OVERACHIEVING TRIP BUDDY</span><span>BUILT WITH FASTAPI + LANGGRAPH</span></footer>
   </main>
   <script>
     const form = document.getElementById('plan-form');
@@ -190,7 +375,27 @@
     const progressLabel = document.getElementById('progress-label');
     const progressValue = document.getElementById('progress-value');
     const stages = [...document.querySelectorAll('[data-stage]')];
+    const newThreadButton = document.getElementById('new-thread');
+    const approvalPanel = document.getElementById('approval-panel');
+    const feedback = document.getElementById('feedback');
+    const approve = document.getElementById('approve');
+    const revise = document.getElementById('revise');
+    const resultKicker = document.getElementById('result-kicker');
+    const resultTitle = document.getElementById('result-title');
+    const threadShort = document.getElementById('thread-short');
+    const flowStatus = document.getElementById('flow-status');
+    const flowStatusText = document.getElementById('flow-status-text');
+    const flowSummary = document.getElementById('flow-summary');
+    const flowNodes = [...document.querySelectorAll('[data-flow]')];
+    const agentPills = [...document.querySelectorAll('[data-agent]')];
     let progressTimer;
+    let threadId = localStorage.getItem('routewise-thread-id');
+
+    function updateThreadLabel() {
+      threadShort.textContent = threadId ? `#${threadId.slice(0, 8)}` : 'READY ON FIRST PLAN';
+    }
+    updateThreadLabel();
+    if (threadId) refreshThreadState().catch(() => {});
 
     document.querySelectorAll('.example').forEach((button) => button.addEventListener('click', () => {
       input.value = button.textContent;
@@ -201,32 +406,10 @@
       event.preventDefault();
       const query = input.value.trim();
       if (query.length < 8) { showError('Please give the planner a little more detail about your trip.'); return; }
-      error.classList.remove('show');
-      result.classList.remove('show');
-      submit.disabled = true;
-      submit.innerHTML = 'Planning your route <span class="arrow">↻</span>';
-      startProgress();
       try {
-        const response = await fetch('/api/plan', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query}) });
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.detail || 'Unable to start your itinerary.');
-        }
-        let completed = false;
-        await readPlanStream(response, (eventName, data) => {
-          if (eventName === 'progress') setProgress(data.value, data.label, data.stage);
-          if (eventName === 'complete') {
-            completed = true;
-            renderMarkdown(data.itinerary);
-            finishProgress();
-            result.classList.add('show');
-            result.scrollIntoView({ behavior:'smooth', block:'start' });
-          }
-          if (eventName === 'error') throw new Error(data.detail || 'Unable to create your itinerary.');
-        });
-        if (!completed) throw new Error('The planning stream ended before an itinerary was returned.');
-      } catch (err) { stopProgress(); showError(err.message || 'Something went wrong while planning this trip.'); }
-      finally { submit.disabled = false; submit.innerHTML = 'Build my route <span class="arrow">→</span>'; }
+        threadId = await ensureThread();
+        await runWorkflow('/api/plan', { query, thread_id: threadId }, false);
+      } catch (err) { handleWorkflowError(err); }
     });
 
     function showError(message) { error.textContent = message; error.classList.add('show'); }
@@ -269,6 +452,165 @@
       setProgress(0, 'Planning paused. You can try again.', 0);
       setTimeout(() => progressPanel.classList.remove('show'), 1800);
     }
+
+    async function ensureThread() {
+      if (threadId) return threadId;
+      const response = await fetch('/api/threads', { method: 'POST' });
+      if (!response.ok) throw new Error('Unable to create a trip thread.');
+      const data = await response.json();
+      threadId = data.thread_id;
+      localStorage.setItem('routewise-thread-id', threadId);
+      updateThreadLabel();
+      return threadId;
+    }
+
+    async function runWorkflow(url, body, isReview) {
+      error.classList.remove('show');
+      approvalPanel.classList.remove('show');
+      if (!isReview) result.classList.remove('show');
+      setPlannerBusy(true, isReview ? 'Updating your route' : 'Planning your route');
+      if (isReview) setFlowStatus('Review submitted', 'live');
+      else beginLiveFlow('Planning your trip');
+      startProgress();
+      let completed = false;
+      let pausedForApproval = false;
+      const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || 'Unable to start your itinerary.');
+      }
+      await readPlanStream(response, (eventName, data) => {
+        if (eventName === 'progress') setProgress(data.value, data.label, data.stage);
+        if (eventName === 'node') markFlowNode(data.node, data.status);
+        if (eventName === 'routing') showRouting(data);
+        if (eventName === 'approval') { pausedForApproval = true; showDraftForApproval(data); }
+        if (eventName === 'complete') { completed = true; showCompletedPlan(data.itinerary); }
+        if (eventName === 'error') throw new Error(data.detail || 'Unable to create your itinerary.');
+      });
+      if (!completed && !pausedForApproval) throw new Error('The planning stream ended before a response was returned.');
+      setPlannerBusy(false);
+    }
+
+    function showDraftForApproval(data) {
+      clearInterval(progressTimer);
+      setProgress(100, 'Draft ready for your review.', 3);
+      setFlowStatus('Waiting for your review', 'waiting');
+      resultKicker.textContent = 'Human review required';
+      resultTitle.textContent = 'Review your trip draft';
+      renderMarkdown(data.draft_iternary || 'No draft itinerary was returned.');
+      feedback.value = '';
+      approvalPanel.classList.add('show');
+      result.classList.add('show');
+      result.scrollIntoView({ behavior:'smooth', block:'start' });
+      refreshThreadState().catch(() => {});
+    }
+
+    function showCompletedPlan(plan) {
+      resultKicker.textContent = 'Your route is ready';
+      resultTitle.textContent = 'Trip blueprint';
+      renderMarkdown(plan);
+      finishProgress();
+      markFlowNode('final', 'completed');
+      setFlowStatus('Final plan complete', 'complete');
+      result.classList.add('show');
+      result.scrollIntoView({ behavior:'smooth', block:'start' });
+      refreshThreadState().catch(() => {});
+    }
+
+    function setPlannerBusy(isBusy, label = 'Planning your route') {
+      submit.disabled = isBusy;
+      approve.disabled = isBusy;
+      revise.disabled = isBusy;
+      newThreadButton.disabled = isBusy;
+      submit.innerHTML = isBusy ? `${label} <span class="arrow">↻</span>` : 'Build my route <span class="arrow">→</span>';
+    }
+
+    function handleWorkflowError(err) {
+      stopProgress();
+      setPlannerBusy(false);
+      setFlowStatus('Workflow needs attention', 'waiting');
+      showError(err.message || 'Something went wrong while planning this trip.');
+    }
+
+    function beginLiveFlow(label) {
+      flowNodes.forEach((node) => node.className = 'flow-node');
+      agentPills.forEach((pill) => pill.classList.remove('selected'));
+      setFlowStatus('Workflow running', 'live');
+      flowSummary.textContent = `${label}. Waiting for the supervisor to select agents…`;
+    }
+
+    function setFlowStatus(text, mode = '') {
+      flowStatusText.textContent = text;
+      flowStatus.className = `flow-status ${mode}`;
+    }
+
+    function flowGroup(nodeName) {
+      if (['flight', 'flight_tools', 'hotel', 'tavily_tools'].includes(nodeName)) return 'research';
+      if (['weather', 'weather_tools', 'budget'].includes(nodeName)) return 'weather_budget';
+      return nodeName;
+    }
+
+    function markFlowNode(nodeName, status) {
+      const node = document.querySelector(`[data-flow="${flowGroup(nodeName)}"]`);
+      if (!node) return;
+      node.className = `flow-node ${status}`;
+    }
+
+    function showRouting(data) {
+      const selected = Array.isArray(data.selected_agents) ? data.selected_agents : [];
+      agentPills.forEach((pill) => pill.classList.toggle('selected', selected.includes(pill.dataset.agent)));
+      markFlowNode('supervisor', 'completed');
+      const destination = data.trip_constraints?.destination;
+      const agentText = selected.length ? selected.map((name) => name.toUpperCase()).join(' · ') : 'No specialist agents selected';
+      flowSummary.textContent = `Supervisor selected: ${agentText}${destination ? ` for ${destination}` : ''}.${data.reasoning ? ` ${data.reasoning}` : ''}`;
+    }
+
+    async function refreshThreadState() {
+      if (!threadId) return;
+      const response = await fetch(`/api/threads/${encodeURIComponent(threadId)}/state`);
+      if (!response.ok) return;
+      const state = await response.json();
+      if (!state.exists) return;
+      showRouting({ selected_agents: state.selected_agents, trip_constraints: state.trip_constraints, reasoning: '' });
+      if (state.approval_request) setFlowStatus('Waiting for your review', 'waiting');
+      if (state.final_response) setFlowStatus('Final plan complete', 'complete');
+    }
+
+    async function submitReview(approved) {
+      const note = feedback.value.trim();
+      if (!approved && !note) { showError('Please add feedback so the agents know what to revise.'); return; }
+      try {
+        await runWorkflow(`/api/threads/${encodeURIComponent(threadId)}/review`, { approved, feedback: note }, true);
+      } catch (err) { handleWorkflowError(err); }
+    }
+
+    approve.addEventListener('click', () => submitReview(true));
+    revise.addEventListener('click', () => submitReview(false));
+
+    newThreadButton.addEventListener('click', async () => {
+      const warning = 'Start a new trip? Your current trip thread will be permanently destroyed and cannot be recovered.';
+      if (threadId && !window.confirm(warning)) return;
+      newThreadButton.disabled = true;
+      try {
+        if (threadId) {
+          const removal = await fetch(`/api/threads/${encodeURIComponent(threadId)}`, { method: 'DELETE' });
+          if (!removal.ok) throw new Error('Unable to remove the previous trip thread.');
+        }
+        threadId = null;
+        localStorage.removeItem('routewise-thread-id');
+        updateThreadLabel();
+        await ensureThread();
+        input.value = '';
+        feedback.value = '';
+        result.classList.remove('show');
+        approvalPanel.classList.remove('show');
+        progressPanel.classList.remove('show');
+        error.classList.remove('show');
+        beginLiveFlow('New thread created');
+        input.focus();
+      } catch (err) { showError(err.message || 'Unable to start a new trip.'); }
+      finally { newThreadButton.disabled = false; }
+    });
 
     async function readPlanStream(response, onEvent) {
       if (!response.body) throw new Error('Streaming is not supported by this browser.');
