@@ -5,8 +5,12 @@ from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from mcp.server.fastmcp import FastMCP
 import requests
+import sys
+from pathlib import Path
 
 load_dotenv()
+
+BASE_DIR = Path(__file__).resolve().parent
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
@@ -66,9 +70,9 @@ async def get_weather_tools():
         {
             "weather": {
                 "transport": "stdio",
-                "command": r"G:\ml projects\travel_multiagent\.venv\Scripts\python.exe",
+                "command": sys.executable,
                 "args": [
-                    r"G:\ml projects\travel_multiagent\weather_mcp_server.py"
+                    str(BASE_DIR / "weather_mcp_server.py")
                 ],
                 "env": {
                     "OPENWEATHER_API_KEY": WEATHER_API_KEY

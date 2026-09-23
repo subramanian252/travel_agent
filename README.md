@@ -6,6 +6,8 @@ LazyPlan is a full-stack, asynchronous travel-planning application built with La
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-multi--agent-1C3C3C)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-checkpoints-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-containerized-2496ED?logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-ECS%20%7C%20ECR%20%7C%20ALB-FF9900?logo=amazonwebservices&logoColor=white)
 
 ## Highlights
 
@@ -114,6 +116,78 @@ uv run uvicorn app:app --reload
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
+## Docker
+
+The production application runs as a Docker container. The image installs the locked Python dependencies with `uv` and starts FastAPI on port `8000` using Uvicorn.
+
+Build and run it locally:
+
+```bash
+docker build -t lazyplan .
+docker run --env-file .env -p 8000:8000 lazyplan
+```
+
+Verify the running container:
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+The expected response is:
+
+```json
+{"status":"ok","service":"routewise","mode":"streaming-hitl"}
+```
+
+The `.dockerignore` file keeps local secrets, the Windows virtual environment, Git data, notebooks, and generated caches out of the Linux image.
+
+## AWS deployment
+
+LazyPlan is deployed on AWS using Docker, Amazon ECR, Amazon ECS, an Application Load Balancer, and CloudWatch.
+
+```text
+Users
+  |
+  v
+Application Load Balancer
+  |  GET /api/health
+  v
+Amazon ECS service
+  |
+  +-- Docker container from Amazon ECR
+  +-- FastAPI / Uvicorn on port 8000
+  +-- LangGraph and local MCP processes
+  +-- Logs sent to Amazon CloudWatch
+  |
+  +--> External PostgreSQL database
+  +--> OpenRouter, Tavily, Aviationstack, and OpenWeather APIs
+```
+
+### Deployment components
+
+| Component | Responsibility |
+| --- | --- |
+| Docker | Packages the FastAPI application and its Python and MCP dependencies. |
+| Amazon ECR | Stores versioned Docker images used by ECS. |
+| Amazon ECS | Runs and restarts the application container. |
+| Application Load Balancer | Exposes the application and forwards traffic to container port `8000`. |
+| Target group health check | Calls `GET /api/health` and sends traffic only to healthy ECS tasks. |
+| CloudWatch Logs | Collects the container's application and Uvicorn logs. |
+| External PostgreSQL | Persists LangGraph checkpoints and Human-in-the-Loop thread state. |
+
+### Release flow
+
+1. Build the Docker image.
+2. Tag the image with a unique release or commit tag.
+3. Push the image to Amazon ECR.
+4. Create a new ECS task-definition revision using that image tag.
+5. Update the ECS service to the new task revision.
+6. ECS starts the container and the load balancer checks `/api/health`.
+7. After the target becomes healthy, the load balancer sends user traffic to it.
+8. Container output is available in the configured CloudWatch log group.
+
+The ECS task receives the API keys and `EXTERNAL_END_POINT` as runtime environment variables or secrets. The `.env` file is used only for local development and is never copied into the Docker image.
+
 ## User flow
 
 1. The guardrail validates the request.
@@ -165,6 +239,11 @@ The browser uses a UUID trip thread. The **New Trip** button asks for confirmati
 | Research tools | Tavily, Aviationstack, local Weather MCP server | Hotel, flight/airport, and weather context. |
 | Frontend | HTML, CSS, vanilla JavaScript | Lightweight UI, SSE stream reader, HITL controls, and Markdown renderer. |
 | Configuration | `python-dotenv` | Local environment-variable management. |
+| Container | Docker | Packages the application for consistent local and AWS execution. |
+| Image registry | Amazon ECR | Stores deployable container image versions. |
+| Runtime | Amazon ECS | Runs the application container as a managed service. |
+| Traffic | Application Load Balancer | Routes HTTP traffic and checks `/api/health`. |
+| Observability | Amazon CloudWatch | Stores ECS container and Uvicorn logs. |
 
 ## API overview
 
@@ -203,6 +282,8 @@ POST /api/threads/{thread_id}/review
 ```text
 agent.py                  # LangGraph workflow, agents, tools, HITL interrupt
 app.py                    # FastAPI routes, SSE bridge, checkpoint/thread lifecycle
+Dockerfile                # Production Python 3.13 container image
+.dockerignore             # Excludes local secrets, environments, and caches
 templates/index.html      # Responsive frontend and stream/HITL client logic
 test_mcp_client.py        # Tavily, Aviationstack, and Weather MCP setup
 weather_mcp_server.py     # Local MCP weather tools
